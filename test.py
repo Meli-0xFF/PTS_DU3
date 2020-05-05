@@ -62,5 +62,29 @@ class Distance4TestCase(asynctest.TestCase):
         self.assertNotEqual(await client.distance4('0'), {'7', '4', '3'})
 
 
+class SystemTestCase(asynctest.TestCase):
+    def setUp(self):
+        global graph
+        graph = {('0', '1'), ('1', '2'), ('2', '3'), ('3', '4'),
+                 ('1', '5'), ('1', '6'), ('5', '6'), ('6', '7'),
+                 ('1', '0'), ('3', '2'), ('3', '1')}
+
+    @asynctest.patch('client.get_neighbours', new_callable=GetNodeNeighbours)
+    @asynctest.patch('client.make_edge', new_callable=MakeEdge)
+    async def test_system(self, neighbours_mock, edge_mock):
+        global graph
+        self.assertEqual(await client.distance4('0'), {'4'})
+        self.assertNotEqual(await client.distance4('0'), {'1', '4', '3'})
+
+        self.assertEqual(await client.climb_degree('0'), '1')
+
+        await client.complete_neighbourhood('3')
+        self.assertTrue(('1', '4') in graph)
+        self.assertTrue(('2', '4') in graph)
+        self.assertTrue(('2', '1') in graph)
+        self.assertTrue(('4', '1') in graph)
+        self.assertTrue(('4', '2') in graph)
+
+
 if __name__ == "__main__":
     asynctest.main()
