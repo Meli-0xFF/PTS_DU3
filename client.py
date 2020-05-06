@@ -40,13 +40,12 @@ async def climb_degree(start):
     root = await get_node(start)
     degrees = {len(n.neighbours):n.port for n in await asyncio.gather(*[get_node(n) for n in sorted(root.neighbours, key=int, reverse=True)])}
 
-    if len((await get_node(degrees.get(max(degrees)))).neighbours) < len(root.neighbours): return start
+    if len((await get_node(degrees.get(max(degrees)))).neighbours) <= len(root.neighbours): return start
     else : return await climb_degree(degrees.get(max(degrees)))
 
 
 async def bfs(start, used: dict, dist: int):
     root = await get_node(start)
-
     if used.get(root.port) is None: used[root.port] = dist
 
     if dist < 4:
